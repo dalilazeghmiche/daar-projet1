@@ -27,13 +27,14 @@ public class Egrep {
     }
 
     public static void main(String[] args) {
-    	String mode = "-dfa";
-    	if (args.length == 3 && (args[0].equals("-nfa") || args[0].equals("-dfa"))) {
+    	String mode = "-min";
+    	if (args.length == 3 && (args[0].equals("-nfa") || args[0].equals("-dfa") ||
+    		     args[0].equals("-min"))) {
     	    mode = args[0];
     	    args = new String[]{args[1], args[2]};
     	}
         if (args.length != 2) {
-            System.err.println("Usage : java Egrep \"RegEx\" fichier.txt");
+            System.err.println("Usage : java Egrep [-nfa | -dfa | -min] \"RegEx\" fichier.txt");
             System.exit(2);
         }
 
@@ -91,16 +92,27 @@ public class Egrep {
     }
     
     private static LineMatcher buildMatcher(NFA nfa, String mode) {
-        if (mode.equals("-dfa")) {
+        if (!mode.equals("-nfa")) {
             try {
                 DFA dfa = DFA.fromNFA(nfa, true);
-                return dfa::matches;
-            } catch (IllegalStateException explosion) {
-                System.err.println("Avertissement : " + explosion.getMessage() + ", simulation du NFA a la place");
+                
+                		if (mode.equals("-min")) {
+                            dfa = Minimizer.minimize(dfa);
+                        }
+
+                        DFA finalDfa = dfa;
+                        return finalDfa::matches;
+
+                    } catch (IllegalStateException explosion) {
+                        System.err.println(
+                            "Avertissement : " + explosion.getMessage()
+                            + ", simulation du NFA a la place"
+                        );
+                    }
+                }
+
+                return new NFAMatcher(nfa)::matches;
             }
-        }
-        return new NFAMatcher(nfa)::matches;
-    }
    
 }
 
