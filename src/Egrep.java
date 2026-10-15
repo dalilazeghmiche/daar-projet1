@@ -27,14 +27,15 @@ public class Egrep {
     }
 
     public static void main(String[] args) {
-    	String mode = "-min";
-    	if (args.length == 3 && (args[0].equals("-nfa") || args[0].equals("-dfa") ||
+    	String mode = "-auto";
+    	if (args.length == 3 && (args[0].equals("-auto") ||
+    		     args[0].equals("-kmp") || args[0].equals("-nfa") || args[0].equals("-dfa") ||
     		     args[0].equals("-min"))) {
     	    mode = args[0];
     	    args = new String[]{args[1], args[2]};
     	}
         if (args.length != 2) {
-            System.err.println("Usage : java Egrep [-nfa | -dfa | -min] \"RegEx\" fichier.txt");
+            System.err.println("Usage : java Egrep [-auto | -kmp | -min | -dfa | -nfa] \"RegEx\" fichier.txt");
             System.exit(2);
         }
 
@@ -48,8 +49,8 @@ public class Egrep {
                                            java.nio.charset.StandardCharsets.ISO_8859_1);
             RegexNode tree = RegexParser.parse(regexBytes);
             
-            NFA nfa = NFA.fromTree(tree);
-            matcher = buildMatcher(nfa, mode);
+          
+            matcher = buildMatcher(tree, mode);
             
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
@@ -91,28 +92,51 @@ public class Egrep {
         System.exit(found ? 0 : 1);
     }
     
-    private static LineMatcher buildMatcher(NFA nfa, String mode) {
+    
+    private static LineMatcher buildMatcher(RegexNode tree, String mode) {
+    	
+
+        // KMP : recherche directe d'une suite de lettres
+        if (mode.equals("-auto") || mode.equals("-kmp")) {
+            byte[] factor = KMP.literalOf(tree);
+
+            if (factor != null) {
+                return new KMP(factor)::matches;
+            }
+
+            if (mode.equals("-kmp")) {
+                throw new IllegalArgumentException(
+                    "-kmp : la RegEx n'est pas une simple suite de lettres"
+                );
+            }
+        }
+
+        // Pour les autres cas, construire le NFA
+        NFA nfa = NFA.fromTree(tree);
+
         if (!mode.equals("-nfa")) {
             try {
                 DFA dfa = DFA.fromNFA(nfa, true);
-                
-                		if (mode.equals("-min")) {
-                            dfa = Minimizer.minimize(dfa);
-                        }
 
-                        DFA finalDfa = dfa;
-                        return finalDfa::matches;
-
-                    } catch (IllegalStateException explosion) {
-                        System.err.println(
-                            "Avertissement : " + explosion.getMessage()
-                            + ", simulation du NFA a la place"
-                        );
-                    }
+                // Minimiser en mode -min et -auto
+                if (mode.equals("-min") || mode.equals("-auto")) {
+                    dfa = Minimizer.minimize(dfa);
                 }
 
-                return new NFAMatcher(nfa)::matches;
+                DFA finalDfa = dfa;
+                return finalDfa::matches;
+
+            } catch (IllegalStateException explosion) {
+                System.err.println(
+                    "Avertissement : " + explosion.getMessage()
+                    + ", simulation du NFA a la place"
+                );
             }
+        }
+
+        return new NFAMatcher(nfa)::matches;
+    }
+    
    
 }
 
