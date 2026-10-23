@@ -1,0 +1,23 @@
+# Livres utilises pour le benchmark (NON inclus dans le rendu, dossier bench_data/)
+# Un numero Gutenberg par ligne ; https://www.gutenberg.org/ebooks/NUMERO
+56667   A History of Babylon
+49345   A History of Sumer and Akkad
+11      Alice's Adventures in Wonderland
+46      A Christmas Carol
+84      Frankenstein
+1661    The Adventures of Sherlock Holmes
+1342    Pride and Prejudice
+98      A Tale of Two Cities
+1080    A Modest Proposal
+345     Dracula
+174     The Picture of Dorian Gray
+76      Adventures of Huckleberry Finn
+1952    The Yellow Wallpaper
+5200    Metamorphosis
+768     Wuthering Heights
+4300    Ulysses
+2554    Crime and Punishment
+2701    Moby Dick
+135     Les Miserables
+2600    War and Peace
+100     The Complete Works of William Shakespeare
