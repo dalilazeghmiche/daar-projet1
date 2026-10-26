@@ -69,7 +69,23 @@ public class Egrep {
     public static void main(String[] args) {
         String mode = "-auto";
         boolean lineNumbers = false, color = false, onlyMatching = false, info = false;
-
+        // --- Guide d'utilisation ---
+        // Sans argument : guide sur stderr et code 2 (lancement incorrect, comme egrep).
+        // -h / --help   : guide sur stdout et code 0 (demande explicite).
+        if (args.length == 0) {
+            printGuide(System.err);
+            System.exit(2);
+        }
+        // On ne cherche -h/--help que parmi les OPTIONS, pas dans "RegEx fichier" :
+        // ainsi on peut toujours chercher le texte "-h" avec : -- "-h" fichier.txt
+        int lastOpt = args.length > 2 ? args.length - 2 : args.length;
+        for (int i = 0; i < lastOpt; i++) {
+            if (args[i].equals("--")) break;
+            if (args[i].equals("-h") || args[i].equals("--help")) {
+                printGuide(System.out);
+                System.exit(0);
+            }
+        }
         // --- Lecture des options ---
         int a = 0;
         while (a < args.length && args.length - a > 2) {
@@ -294,11 +310,54 @@ public class Egrep {
         }
     }
 
-    /** Erreur d'utilisation : message court, code 2. */
+    /** Erreur d'utilisation : message court + rappel de --help, code 2. */
     private static void usage(String msg) {
         if (msg != null) System.err.println("Erreur : " + msg);
-        System.err.println("Usage : java Egrep [-n] [-o] [--color] [--info] "
-                + "[-auto | -bm | -kmp | -min | -dfa | -nfa] \"RegEx\" fichier.txt");
+        System.err.println("Usage : java -jar egrep.jar [options] [moteur] \"RegEx\" fichier.txt");
+        System.err.println("Tapez  java -jar egrep.jar --help  pour le guide complet.");
         System.exit(2);
     }
+
+    /**
+     * Guide d'utilisation (sans accents : il doit s'afficher correctement dans toutes
+     * les consoles, y compris l'invite de commandes Windows).
+     */
+    private static void printGuide(java.io.PrintStream out) {
+        out.println(String.join("\n",
+            "egrep (clone) - DAAR projet 1, Sorbonne Universite",
+            "Affiche les lignes d'un fichier qui contiennent un motif (RegEx).",
+            "",
+            "USAGE",
+            "  java -jar egrep.jar [options] [moteur] \"RegEx\" fichier.txt",
+            "  (toujours mettre la RegEx entre guillemets)",
+            "",
+            "REGEX ACCEPTEES",
+            "  lettres  abc        point  .  (n'importe quel caractere)",
+            "  alternative  a|b    etoile  a*  (0 fois ou plus)    plus  a+  (1 fois ou plus)",
+            "  parentheses  (ab)   \\c  cherche le caractere c lui-meme (ex. \\.  \\?  \\*)",
+            "  Non supportes : ?  [  {  ^  $   (message d'erreur explicite)",
+            "",
+            "OPTIONS D'AFFICHAGE",
+            "  -n          numero de ligne devant chaque ligne trouvee",
+            "  --color     motif trouve en gras rouge",
+            "  -o          seulement les morceaux trouves, un par ligne",
+            "  --info      algorithme choisi et taille des automates (sur stderr)",
+            "  -h, --help  affiche ce guide",
+            "",
+            "MOTEURS (le resultat est le meme, seul le temps change)",
+            "  -auto  (defaut) mot simple -> Boyer-Moore, sinon automate (DFA minimal)",
+            "  -bm    mot simple -> Boyer-Moore, sinon DFA minimal",
+            "  -kmp   mot simple -> KMP, sinon DFA minimal",
+            "  -min   DFA minimal   ",
+            "  -dfa  DFA non minimise ",
+            "  -nfa  simulation du NFA",
+            "",
+            "EXEMPLES",
+            "  java -jar egrep.jar -n --color \"S(a|g|r)+on\" tests/data/56667.txt",
+            "  java -jar egrep.jar -n -o \"(Ass|Bab)(y|ur)+\" tests/data/56667.txt",
+            "  java -jar egrep.jar -kmp --info \"Sargon\" tests/data/56667.txt",
+            "",
+            "CODE DE RETOUR : 0 = trouve, 1 = rien trouve, 2 = erreur"));
+    }
+
 }
