@@ -112,4 +112,32 @@ public class NFAMatcher {
         for (int i = 0; i < size; i++) if (set[i] == q) return true;
         return false;
     }
+    
+    
+    /**
+     * Surlignage : fin de la plus LONGUE sous-chaine reconnue qui commence en position i,
+     * -1 si aucune. Meme simulation que matches(), mais SANS relancer depuis start
+     * (on cherche une correspondance ancree en i), et on continue apres l'etat final
+     * pour trouver la plus longue.
+     */
+    
+    public int longestMatchEnd(byte[] buf, int i, int to) {
+        newSet();
+        addWithClosure(start);
+        swap();
+        int last = contains(cur, curSize, accept) ? i : -1;
+        for (int k = i; k < to; k++) {
+            int c = buf[k] & 0xFF;
+            newSet();
+            for (int j = 0; j < curSize; j++) {
+                int q = cur[j];
+                int l = label[q];
+                if (l == c || l == NFA.DOT) addWithClosure(target[q]);
+            }
+            swap();
+            if (curSize == 0) break;                         // plus aucun etat actif
+            if (mark[accept] == stamp) last = k + 1;
+        }
+        return last;
+    }
 }

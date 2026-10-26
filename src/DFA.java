@@ -152,6 +152,26 @@ public class DFA {
         return accept[s];
     }
 
+    
+    /**
+     * Surlignage : fin de la plus LONGUE sous-chaine reconnue qui COMMENCE en position i
+     * (DFA en mode exact). Renvoie -1 si aucune ; i si seul le mot vide est reconnu.
+     * On s'arrete des que l'on tombe dans l'etat mort (-1).
+     */
+    
+    public int longestMatchEnd(byte[] buf, int i, int to) {
+        if (searchMode)
+            throw new IllegalStateException("le surlignage utilise le DFA en mode exact");
+        int s = start;
+        int last = accept[s] ? i : -1;
+        for (int k = i; k < to; k++) {
+            s = trans[s][buf[k] & 0xFF];
+            if (s < 0) break;
+            if (accept[s]) last = k + 1;
+        }
+        return last;
+    }
+    
     // =====================================================================
     //  Affichage
     // =====================================================================
