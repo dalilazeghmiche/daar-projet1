@@ -14,7 +14,9 @@ public class ParserTest {
             System.out.println();
         }
 
-        String[] invalides = { "", "a|", "|a", "()", "(ab", "ab)", "*a", "a**b(" };
+        String[] invalides = { "", "a|", "|a", "()", "(ab", "ab)", "*a", "a**b(",
+                // operateurs ERE hors perimetre : refuses plutot que lus comme des lettres
+                "Sarg?on", "S[a-z]+on", "Sa{1}rgon", "^Sargon", "Sargon$" };
         int ok = 0;
         for (String r : invalides) {
             try {

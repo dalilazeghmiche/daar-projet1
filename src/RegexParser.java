@@ -93,6 +93,9 @@ public class RegexParser {
                 throw error("'" + c + "' sans rien a repeter");
             case ')': case '|':
                 throw error("caractere inattendu '" + c + "'");  // normalement deja filtre
+            case '?': case '[': case '{': case '^': case '$':
+                throw error("operateur ERE '" + c + "' non supporte (hors perimetre du projet) ; "
+                        + "ecrire \\" + c + " pour chercher le caractere '" + c + "'");
             default:
                 pos++;
                 return RegexNode.letter(c);
