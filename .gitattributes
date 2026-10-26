@@ -1,0 +1,3 @@
+# Fins de ligne Unix obligatoires pour les scripts bash et le Makefile (sinon : $'\r': command not found)
+*.sh     text eol=lf
+Makefile text eol=lf
