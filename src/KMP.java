@@ -48,18 +48,25 @@ public class KMP {
         return c;
     }
 
-    /** Vrai si buf[from..to[ contient le facteur. */
-    public boolean matches(byte[] buf, int from, int to) {
+    /** Position de la premiere occurrence du facteur dans buf[from..to[, ou -1. */
+    public int find(byte[] buf, int from, int to) {
         int m = factor.length;
         int j = 0;                                   // position courante dans le facteur
         for (int i = from; i < to; i++) {
             byte t = buf[i];
             while (j >= 0 && factor[j] != t) j = carry[j];
             j++;
-            if (j == m) return true;                 // facteur trouve
+            if (j == m) return i + 1 - m;            // facteur trouve, il finit en i
         }
-        return false;
+        return -1;
     }
+
+    /** Vrai si buf[from..to[ contient le facteur. */
+    public boolean matches(byte[] buf, int from, int to) {
+        return find(buf, from, to) >= 0;
+    }
+
+    public int length() { return factor.length; }
 
     public boolean matches(String line) {
         byte[] b = line.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1);
