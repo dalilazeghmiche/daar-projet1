@@ -27,7 +27,7 @@ import java.nio.file.Paths;
  *     -o       : n'affiche que les sous-chaines reconnues, une par ligne (comme egrep -o)
  *     --info   : affiche sur stderr le moteur choisi et la taille des automates
  *
- * Sans option, la sortie est octet pour octet celle de "LC_ALL=C egrep" (verifiable avec diff).
+ * Sans option, la sortie est octet pour octet celle de "LC_ALL=C egrep" .
  * Avec -n et/ou -o, elle est celle de "LC_ALL=C egrep -n / -o / -no".
  * Le fichier est lu en OCTETS : chaque octet est un caractere.
  *
